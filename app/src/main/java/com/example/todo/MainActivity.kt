@@ -42,59 +42,24 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ToDOScreen(toDoViewModel: ToDoViewModel = hiltViewModel()) {
-
-    val toDoList = toDoViewModel.toDoList.collectAsState(initial = null)
-    val materialBlue700 = Color(0xFF1976D2)
-    val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
+@OptIn(ExperimentalMaterialApi::class)
+fun ToDOScreen(
+    toDoViewModel: ToDoViewModel = hiltViewModel()
+) {
     val state = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
-    Scaffold(
-        scaffoldState = scaffoldState,
-        topBar = { TopAppBar(title = { Text("To Do List") }, backgroundColor = materialBlue700) },
-        floatingActionButtonPosition = FabPosition.End,
-        //isFloatingActionButtonDocked = true,
-        floatingActionButton = {
-            if (!state.isVisible)
-                FloatingActionButton(onClick = {
-
-                    //TODO("ADD ENTITY")
-                    /*val entity = ToDoEntity("Run", "akjsfhaf", date = System.currentTimeMillis())
-                    toDoViewModel.insert(entity)*/
-                    scope.launch { state.show() }
-
-
-                }) { Text("+") }
-        },
-
-        content = {
-
-            ModalBottomSheetSample(state, scope, toDoList)
-
-        },
-        // bottomBar = { BottomAppBar(backgroundColor = materialBlue700) { Text("BottomAppBar") } }
-    )
-
-
-}
-
-@Composable
-@OptIn(ExperimentalMaterialApi::class)
-fun ModalBottomSheetSample(
-    state: ModalBottomSheetState,
-    scope: CoroutineScope,
-    toDoList: State<List<ToDoEntity>?>
-) {
+    val toDoList = toDoViewModel.toDoList.collectAsState(initial = null)
 
     ModalBottomSheetLayout(
         sheetState = state,
         sheetContent = {
-            Column {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp)
+            ) {
                 val textState = remember { mutableStateOf(TextFieldValue()) }
-
 
                 TextField(
                     modifier = Modifier.fillMaxWidth(),
@@ -103,37 +68,65 @@ fun ModalBottomSheetSample(
                     onValueChange = { textState.value = it }
                 )
 
-
-
                 TextField(
+                    modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("Actividad") },
                     value = textState.value,
                     onValueChange = { textState.value = it }
                 )
 
                 TextField(
+                    modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("Actividad") },
                     value = textState.value,
                     onValueChange = { textState.value = it }
                 )
 
-
-            }
-
-
-        }
-    ) {
-        toDoList.value?.let { listTodo ->
-            LazyColumn(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(listTodo) {
-                    Text(text = it.actividad)
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { /*TODO  Add new Entity*/ }) {
+                    Text(text = "ADD")
                 }
             }
-            //TODO( "ADD TODO LIST" )
-
         }
+    ) {
+        val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
+        Scaffold(
+            scaffoldState = scaffoldState,
+            topBar = { TopAppBar(title = { Text("To Do List") }) },
+            floatingActionButtonPosition = FabPosition.End,
+            //isFloatingActionButtonDocked = true,
+            floatingActionButton = {
+                if (!state.isVisible)
+                    FloatingActionButton(onClick = {
+
+                        //TODO("ADD ENTITY")
+                        /*val entity = ToDoEntity("Run", "akjsfhaf", date = System.currentTimeMillis())
+                        toDoViewModel.insert(entity)*/
+                        scope.launch { state.show() }
+
+
+                    }) { Text("+") }
+            },
+
+            content = {
+
+
+                toDoList.value?.let { listTodo ->
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(listTodo) {
+                            Text(text = it.actividad)
+                        }
+                    }
+                    //TODO( "ADD TODO LIST" )
+
+                }
+            },
+            // bottomBar = { BottomAppBar(backgroundColor = materialBlue700) { Text("BottomAppBar") } }
+        )
+
     }
 }
 
