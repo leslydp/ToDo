@@ -15,7 +15,7 @@ interface To_DoDao {
     fun getToDoListOrder(): Flow<List<ToDoEntity>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(actividad: ToDoEntity, descriotion: ToDoEntity, date: ToDoEntity)
+    suspend fun insert(toDoEntity: ToDoEntity)
 
     @Query("DELETE FROM to_do_table")
     suspend fun deleteAll()

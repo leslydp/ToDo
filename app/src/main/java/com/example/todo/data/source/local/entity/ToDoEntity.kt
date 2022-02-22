@@ -7,8 +7,11 @@ import java.time.chrono.ChronoLocalDate
 import java.time.chrono.ChronoZonedDateTime
 
 @Entity(tableName = "to_do_table")
-class ToDoEntity(
-    @PrimaryKey @ColumnInfo (name = "actividad") val actividad: String,
-    @ColumnInfo (name = "description") val descriotion: String,
-    @ColumnInfo (name = "date") val date: Long = System.currentTimeMillis()
-)
+data class ToDoEntity(
+    val actividad: String,
+    val todoDescription: String,
+    @ColumnInfo(name = "date") val date: Long
+) {
+    @PrimaryKey(autoGenerate = true)
+    var id: Int = 0
+}

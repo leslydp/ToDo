@@ -6,13 +6,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
-class ToDoRepository(private val toDodao: To_DoDao){
+class ToDoRepository(private val toDodao: To_DoDao) {
 
-    val toDoList: Flow<List<ToDoEntity>> =toDodao.getToDoListOrder()
+    val toDoList: Flow<List<ToDoEntity>> = toDodao.getToDoListOrder()
 
-    suspend fun insert(actividad: ToDoEntity, descriotion: ToDoEntity, date: ToDoEntity){
-        withContext(Dispatchers.IO){
-            toDodao.insert(actividad, descriotion, date)
+    suspend fun insert(toDoEntity: ToDoEntity) {
+        withContext(Dispatchers.IO) {
+            toDodao.insert(toDoEntity = toDoEntity)
         }
     }
 

@@ -15,7 +15,9 @@ import javax.inject.Inject
 class ToDoViewModel @Inject constructor(private val repository: ToDoRepository) : ViewModel() {
     val toDoList: Flow<List<ToDoEntity>> = repository.toDoList
 
-    fun insert(actividad: ToDoEntity, descriotion: ToDoEntity, date: ToDoEntity) =viewModelScope.launch(Dispatchers.Main){
-        repository.insert(actividad, descriotion, date)
+    fun insert(toDoEntity: ToDoEntity) {
+        viewModelScope.launch(Dispatchers.Main) {
+            repository.insert(toDoEntity = toDoEntity)
+        }
     }
 }

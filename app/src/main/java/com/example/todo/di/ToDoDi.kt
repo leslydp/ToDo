@@ -29,7 +29,7 @@ object ToDoDi{
     }
 
     @Provides
-    fun providesToDoDao(dataBase: DataBase) {
+    fun providesToDoDao(dataBase: DataBase): To_DoDao {
         return dataBase.To_DoDao()
     }
 }
