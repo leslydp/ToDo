@@ -78,15 +78,18 @@ fun ToDOScreen(
                     .fillMaxSize()
                     .padding(8.dp)
             ) {
-                var textState = remember { mutableStateOf(TextFieldValue()) }
+                //val textState = remember { mutableStateOf("") }
+                val (textState, setTextState) = remember { mutableStateOf("") }
+
+
                 val textState1 = remember { mutableStateOf(TextFieldValue()) }
                 val textState2 = remember { mutableStateOf(TextFieldValue()) }
 
                 TextField(
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("Actividad") },
-                    value = textState.value,
-                    onValueChange = { textState.value = it }
+                    value = textState,
+                    onValueChange = setTextState
                 )
 
                 TextField(
@@ -107,7 +110,7 @@ fun ToDOScreen(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
                         val entity = ToDoEntity(
-                            textState.value.text,
+                            textState,
                             textState1.value.text,
                             date = System.currentTimeMillis()
                         )
@@ -115,6 +118,8 @@ fun ToDOScreen(
                         // var sheetState = state.currentValue
                         scope.launch { state.hide() }
                         keyboardController?.hide()
+                        setTextState("")
+                        textState1.value = TextFieldValue()
 
                     }) {
                     Text(text = "ADD")
