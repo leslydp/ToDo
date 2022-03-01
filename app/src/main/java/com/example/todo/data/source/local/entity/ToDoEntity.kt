@@ -8,11 +8,9 @@ import java.time.chrono.ChronoZonedDateTime
 
 @Entity(tableName = "to_do_table")
 data class ToDoEntity(
+    @PrimaryKey(autoGenerate = false)
     val actividad: String,
     val todoDescription: String,
     @ColumnInfo(name = "date") val date: Long,
     val done: Boolean = false
-) {
-    @PrimaryKey(autoGenerate = true)
-    var id: Int = 0
-}
+)

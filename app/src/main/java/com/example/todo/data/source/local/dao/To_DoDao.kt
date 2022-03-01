@@ -11,13 +11,13 @@ interface To_DoDao {
     @Query("SELECT * FROM to_do_table ORDER BY date ASC" )
     fun getToDoListOrder(): Flow<List<ToDoEntity>>
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(toDoEntity: ToDoEntity)
 
     @Query("DELETE FROM to_do_table")
     suspend fun deleteAll()
 
-    @Update
+    @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun update( toDoEntity: ToDoEntity)
 
 }

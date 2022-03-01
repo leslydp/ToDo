@@ -1,6 +1,8 @@
 package com.example.todo
 
 import android.os.Bundle
+import android.text.style.UnderlineSpan
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.animateColorAsState
@@ -25,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,6 +40,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import kotlin.random.Random
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -102,9 +106,13 @@ fun ToDOScreen(
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
-                        val entity = ToDoEntity(textState.value.text, textState1.value.text, date = System.currentTimeMillis())
+                        val entity = ToDoEntity(
+                            textState.value.text,
+                            textState1.value.text,
+                            date = System.currentTimeMillis()
+                        )
                         toDoViewModel.insert(entity)
-                       // var sheetState = state.currentValue
+                        // var sheetState = state.currentValue
                         scope.launch { state.hide() }
                         keyboardController?.hide()
 
@@ -140,10 +148,15 @@ fun ToDOScreen(
                     LazyColumn(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        items(listTodo) {
-                                ToDoItem(it, onDone = {done->
-                                    toDoViewModel.update(done.copy(done = true))
-                                } )
+                        items(listTodo) { currentTodo ->
+                            ToDoItem(currentTodo, onCheckedChangeState = { done ->
+                                Log.d("LIST_ITEM", "currentTodo: ${currentTodo.actividad}-$done")
+                                toDoViewModel.update(
+                                    currentTodo.copy(
+                                        done = done,
+                                    )
+                                )
+                            })
 
                             //Text(text = it.todoDescription)
                             //SwipeToDismissListItems(items = listTodo)
@@ -160,8 +173,8 @@ fun ToDOScreen(
 }
 
 @Composable
-fun ToDoItem(toDoEntity: ToDoEntity, onDone: (ToDoEntity)-> Unit) {
-    val scope = rememberCoroutineScope()
+fun ToDoItem(toDoEntity: ToDoEntity, onCheckedChangeState: (Boolean) -> Unit) {
+
     val checkedState = remember { mutableStateOf(false) }
     Card(
         elevation = 8.dp,
@@ -173,23 +186,30 @@ fun ToDoItem(toDoEntity: ToDoEntity, onDone: (ToDoEntity)-> Unit) {
         Row(modifier = Modifier.padding(4.dp)) {
 
             Checkbox(
-                checked = checkedState.value,
-                onCheckedChange = {
-                    if(it)
-                        onDone(toDoEntity)
-                }
+                checked = toDoEntity.done,
+                onCheckedChange =
+                onCheckedChangeState
+
             )
             Column(modifier = Modifier.padding(4.dp)) {
-                Text(text = toDoEntity.actividad, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    text = toDoEntity.actividad,
+                    textDecoration =
+                    if (toDoEntity.done) {
+                        TextDecoration.combine(
+                            listOf(
+                                TextDecoration.LineThrough
+                            )
+                        )
+                    } else {
+                        null
+                    }, fontSize = 16.sp, fontWeight = FontWeight.Bold
+                )
                 Text(text = toDoEntity.todoDescription)
                 val simpleDateFormat = SimpleDateFormat("dd/MM/yyyy")
                 val dateString = simpleDateFormat.format(toDoEntity.date)
                 Text(text = dateString)
-
-
-
             }
-
 
 
         }
@@ -200,7 +220,7 @@ fun ToDoItem(toDoEntity: ToDoEntity, onDone: (ToDoEntity)-> Unit) {
 
 @Composable
 @OptIn(ExperimentalMaterialApi::class)
-fun SwipeToDismissListItems(items:List<ToDoEntity>) {
+fun SwipeToDismissListItems(items: List<ToDoEntity>) {
     ///val toDoList = toDoViewModel.toDoList.collectAsState(initial = null)
     // This is an example of a list of dismissible items, similar to what you would see in an
     // email app. Swiping left reveals a 'delete' icon and swiping right reveals a 'done' icon.
@@ -294,12 +314,15 @@ fun SwipeToDismissListItems(items:List<ToDoEntity>) {
                                         onCheckedChange = { checkedState.value = it },
                                     )
                                     Column(modifier = Modifier.padding(4.dp)) {
-                                        Text(text = it.actividad, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                        Text(
+                                            text = it.actividad,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
                                         Text(text = it.todoDescription)
                                         val simpleDateFormat = SimpleDateFormat("dd/MM/yyyy")
                                         val dateString = simpleDateFormat.format(it.date)
                                         Text(text = dateString)
-
 
 
                                     }
@@ -319,7 +342,6 @@ fun SwipeToDismissListItems(items:List<ToDoEntity>) {
         }
     }
 }
-
 
 
 @Preview(showBackground = true)
