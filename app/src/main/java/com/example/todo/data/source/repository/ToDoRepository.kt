@@ -16,4 +16,18 @@ class ToDoRepository(private val toDodao: To_DoDao) {
         }
     }
 
+    suspend fun delete() {
+        withContext(Dispatchers.IO) {
+            toDodao.deleteAll()
+    }
+
+      }
+
+    suspend fun update(toDoEntity: ToDoEntity)  {
+        withContext(Dispatchers.IO){
+            toDodao.update(toDoEntity)
+        }
+
+    }
+
 }

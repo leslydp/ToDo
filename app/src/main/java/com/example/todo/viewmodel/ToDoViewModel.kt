@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -19,5 +20,15 @@ class ToDoViewModel @Inject constructor(private val repository: ToDoRepository) 
         viewModelScope.launch(Dispatchers.Main) {
             repository.insert(toDoEntity = toDoEntity)
         }
+    }
+
+
+    fun update(toDoEntity: ToDoEntity)  {
+        viewModelScope.launch(Dispatchers.Main) {
+            repository.update(toDoEntity)
+
+        }
+
+
     }
 }
