@@ -31,4 +31,10 @@ class ToDoViewModel @Inject constructor(private val repository: ToDoRepository) 
 
 
     }
+
+    fun delete(toDoEntity: ToDoEntity){
+        viewModelScope.launch(Dispatchers.Main){
+            repository.delete(toDoEntity)
+        }
+    }
 }

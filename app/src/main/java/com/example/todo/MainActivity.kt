@@ -153,15 +153,24 @@ fun ToDOScreen(
                     LazyColumn(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        items(listTodo) { currentTodo ->
-                            ToDoItem(currentTodo, onCheckedChangeState = { done ->
+                       items(listTodo, {todoEntity: ToDoEntity-> todoEntity.actividad}) { currentTodo ->
+                           /* ToDoItem(currentTodo, onCheckedChangeState = { done ->
                                 Log.d("LIST_ITEM", "currentTodo: ${currentTodo.actividad}-$done")
                                 toDoViewModel.update(
                                     currentTodo.copy(
                                         done = done,
                                     )
                                 )
-                            })
+
+                            })*/
+                                SwipeToDismissListItems(currentTodo){
+
+
+                                    toDoViewModel.delete(currentTodo)
+
+
+
+                                }
 
                             //Text(text = it.todoDescription)
                             //SwipeToDismissListItems(items = listTodo)
@@ -225,7 +234,7 @@ fun ToDoItem(toDoEntity: ToDoEntity, onCheckedChangeState: (Boolean) -> Unit) {
 
 @Composable
 @OptIn(ExperimentalMaterialApi::class)
-fun SwipeToDismissListItems(items: List<ToDoEntity>) {
+fun SwipeToDismissListItems(item: ToDoEntity, ondismiss : ()-> Unit) {
     ///val toDoList = toDoViewModel.toDoList.collectAsState(initial = null)
     // This is an example of a list of dismissible items, similar to what you would see in an
     // email app. Swiping left reveals a 'delete' icon and swiping right reveals a 'done' icon.
@@ -233,13 +242,19 @@ fun SwipeToDismissListItems(items: List<ToDoEntity>) {
     // will animate to red if you're swiping left or green if you're swiping right. When you let
     // go, the item will animate out of the way if you're swiping left (like deleting an email) or
     // back to its default position if you're swiping right (like marking an email as read/unread).
-    LazyColumn {
-        items(items) { item ->
-            var unread by remember { mutableStateOf(false) }
+    Column {
+        //items(items) { item ->
+
             val dismissState = rememberDismissState(
                 confirmStateChange = {
-                    if (it == DismissValue.DismissedToEnd) unread = !unread
-                    it != DismissValue.DismissedToEnd
+                    if (it == DismissValue.DismissedToStart){
+                        ondismiss()
+                    }
+                    if(it == DismissValue.DismissedToEnd) {
+                        ondismiss()
+                    }
+
+                    true
                 }
             )
             SwipeToDismiss(
@@ -297,54 +312,49 @@ fun SwipeToDismissListItems(items: List<ToDoEntity>) {
                          )
                      }*/
                     //toDoList.value?.let { listTodo ->
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        items(items) {
+
+
+                        //items(item) {
                             //ToDoItem(it.actividad, it.todoDescription, it.date)
                             //Text(text = it.todoDescription)
                             Card(
                                 elevation = animateDpAsState(
-                                    if (dismissState.dismissDirection != null) 4.dp else 0.dp
+                                    if (dismissState.dismissDirection != null) 4.dp else 6.dp
                                 ).value,
                                 shape = RoundedCornerShape(20),
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(8.dp)
+                                    .padding(6.dp)
                             ) {
-                                Row(modifier = Modifier.padding(4.dp)) {
-                                    val checkedState = remember { mutableStateOf(false) }
-                                    Checkbox(
-                                        checked = checkedState.value,
-                                        onCheckedChange = { checkedState.value = it },
-                                    )
+
+
                                     Column(modifier = Modifier.padding(4.dp)) {
                                         Text(
-                                            text = it.actividad,
+                                            text = item.actividad,
                                             fontSize = 16.sp,
                                             fontWeight = FontWeight.Bold
                                         )
-                                        Text(text = it.todoDescription)
+                                        Text(text = item.todoDescription)
                                         val simpleDateFormat = SimpleDateFormat("dd/MM/yyyy")
-                                        val dateString = simpleDateFormat.format(it.date)
+                                        val dateString = simpleDateFormat.format(item.date)
                                         Text(text = dateString)
 
 
                                     }
                                     /*if(checkedState.value)
                                         scope.launch {Modifier.alpha(0f)}*/
-                                }
+
 
                             }
-                        }
+                       // }
                         // }
                         //TODO( "ADD TODO LIST" )
 
-                    }
+
                 }
 
             )
-        }
+       // }
     }
 }
 

@@ -30,4 +30,10 @@ class ToDoRepository(private val toDodao: To_DoDao) {
 
     }
 
+    suspend fun delete(toDoEntity: ToDoEntity){
+        withContext(Dispatchers.IO){
+            toDodao.delete(toDoEntity)
+        }
+    }
+
 }

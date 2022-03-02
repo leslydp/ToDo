@@ -20,4 +20,7 @@ interface To_DoDao {
     @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun update( toDoEntity: ToDoEntity)
 
+    @Delete
+    suspend fun delete(toDoEntity: ToDoEntity)
+
 }
