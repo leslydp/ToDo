@@ -159,7 +159,10 @@ fun ToDOScreen(
 
                              })*/
                             SwipeToDismissListItems(currentTodo) {
-                                toDoViewModel.delete(currentTodo)
+                                if(it == DismissEvent.DeleteDismiss)
+                                    toDoViewModel.delete(currentTodo)
+                                else if(it == DismissEvent.DoneDismiss)
+                                    toDoViewModel.update(currentTodo.copy(done = true))
                             }
 
                             //Text(text = it.todoDescription)
