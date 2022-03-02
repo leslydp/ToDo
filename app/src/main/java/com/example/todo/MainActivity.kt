@@ -1,8 +1,6 @@
 package com.example.todo
 
 import android.os.Bundle
-import android.text.style.UnderlineSpan
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.animateColorAsState
@@ -17,11 +15,9 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -36,11 +32,8 @@ import com.example.todo.data.source.local.entity.ToDoEntity
 import com.example.todo.ui.theme.ToDoTheme
 import com.example.todo.viewmodel.ToDoViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import kotlin.random.Random
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -153,24 +146,21 @@ fun ToDOScreen(
                     LazyColumn(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                       items(listTodo, {todoEntity: ToDoEntity-> todoEntity.actividad}) { currentTodo ->
-                           /* ToDoItem(currentTodo, onCheckedChangeState = { done ->
-                                Log.d("LIST_ITEM", "currentTodo: ${currentTodo.actividad}-$done")
-                                toDoViewModel.update(
-                                    currentTodo.copy(
-                                        done = done,
-                                    )
-                                )
+                        items(
+                            listTodo,
+                            { todoEntity: ToDoEntity -> todoEntity.actividad }) { currentTodo ->
+                            /* ToDoItem(currentTodo, onCheckedChangeState = { done ->
+                                 Log.d("LIST_ITEM", "currentTodo: ${currentTodo.actividad}-$done")
+                                 toDoViewModel.update(
+                                     currentTodo.copy(
+                                         done = done,
+                                     )
+                                 )
 
-                            })*/
-                                SwipeToDismissListItems(currentTodo){
-
-
-                                    toDoViewModel.delete(currentTodo)
-
-
-
-                                }
+                             })*/
+                            SwipeToDismissListItems(currentTodo) {
+                                toDoViewModel.delete(currentTodo)
+                            }
 
                             //Text(text = it.todoDescription)
                             //SwipeToDismissListItems(items = listTodo)
@@ -232,9 +222,14 @@ fun ToDoItem(toDoEntity: ToDoEntity, onCheckedChangeState: (Boolean) -> Unit) {
 
 }
 
+sealed class DismissEvent {
+    object DoneDismiss : DismissEvent()
+    object DeleteDismiss : DismissEvent()
+}
+
 @Composable
 @OptIn(ExperimentalMaterialApi::class)
-fun SwipeToDismissListItems(item: ToDoEntity, ondismiss : ()-> Unit) {
+fun SwipeToDismissListItems(item: ToDoEntity, onDismiss: (DismissEvent) -> Unit) {
     ///val toDoList = toDoViewModel.toDoList.collectAsState(initial = null)
     // This is an example of a list of dismissible items, similar to what you would see in an
     // email app. Swiping left reveals a 'delete' icon and swiping right reveals a 'done' icon.
@@ -245,116 +240,122 @@ fun SwipeToDismissListItems(item: ToDoEntity, ondismiss : ()-> Unit) {
     Column {
         //items(items) { item ->
 
-            val dismissState = rememberDismissState(
-                confirmStateChange = {
-                    if (it == DismissValue.DismissedToStart){
-                        ondismiss()
+        val dismissState = rememberDismissState(
+            confirmStateChange = { dismissValue ->
+                when (dismissValue) {
+                    DismissValue.DismissedToStart -> {
+                        onDismiss(DismissEvent.DeleteDismiss)
                     }
-                    if(it == DismissValue.DismissedToEnd) {
-                        ondismiss()
+                    DismissValue.DismissedToEnd -> {
+                        onDismiss(DismissEvent.DoneDismiss)
                     }
 
-                    true
+                    else -> {
+
+                    }
                 }
-            )
-            SwipeToDismiss(
-                state = dismissState,
-                modifier = Modifier.padding(vertical = 4.dp),
-                directions = setOf(DismissDirection.StartToEnd, DismissDirection.EndToStart),
-                dismissThresholds = { direction ->
-                    FractionalThreshold(if (direction == DismissDirection.StartToEnd) 0.25f else 0.5f)
-                },
-                background = {
-                    val direction = dismissState.dismissDirection ?: return@SwipeToDismiss
-                    val color by animateColorAsState(
-                        when (dismissState.targetValue) {
-                            DismissValue.Default -> Color.LightGray
-                            DismissValue.DismissedToEnd -> Color.Green
-                            DismissValue.DismissedToStart -> Color.Red
-                        }
-                    )
-                    val alignment = when (direction) {
-                        DismissDirection.StartToEnd -> Alignment.CenterStart
-                        DismissDirection.EndToStart -> Alignment.CenterEnd
+
+                true
+            }
+        )
+        SwipeToDismiss(
+            state = dismissState,
+            modifier = Modifier.padding(vertical = 4.dp),
+            directions = setOf(DismissDirection.StartToEnd, DismissDirection.EndToStart),
+            dismissThresholds = { direction ->
+                FractionalThreshold(if (direction == DismissDirection.StartToEnd) 0.25f else 0.5f)
+            },
+            background = {
+                val direction = dismissState.dismissDirection ?: return@SwipeToDismiss
+                val color by animateColorAsState(
+                    when (dismissState.targetValue) {
+                        DismissValue.Default -> Color.LightGray
+                        DismissValue.DismissedToEnd -> Color.Green
+                        DismissValue.DismissedToStart -> Color.Red
                     }
-                    val icon = when (direction) {
-                        DismissDirection.StartToEnd -> Icons.Default.Done
-                        DismissDirection.EndToStart -> Icons.Default.Delete
-                    }
-                    val scale by animateFloatAsState(
-                        if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f
+                )
+                val alignment = when (direction) {
+                    DismissDirection.StartToEnd -> Alignment.CenterStart
+                    DismissDirection.EndToStart -> Alignment.CenterEnd
+                }
+                val icon = when (direction) {
+                    DismissDirection.StartToEnd -> Icons.Default.Done
+                    DismissDirection.EndToStart -> Icons.Default.Delete
+                }
+                val scale by animateFloatAsState(
+                    if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f
+                )
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .background(color)
+                        .padding(horizontal = 20.dp),
+                    contentAlignment = alignment
+                ) {
+                    Icon(
+                        icon,
+                        contentDescription = "Localized description",
+                        modifier = Modifier.scale(scale)
                     )
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .background(color)
-                            .padding(horizontal = 20.dp),
-                        contentAlignment = alignment
-                    ) {
-                        Icon(
-                            icon,
-                            contentDescription = "Localized description",
-                            modifier = Modifier.scale(scale)
+                }
+            },
+            dismissContent = {
+                /* Card(
+                     elevation = animateDpAsState(
+                         if (dismissState.dismissDirection != null) 4.dp else 0.dp
+                     ).value
+                 ) {
+                     ListItem(
+                         text = {
+                             Text(item, fontWeight = if (unread) FontWeight.Bold else null)
+                         },
+                         secondaryText = { Text("Swipe me left or right!") }
+                     )
+                 }*/
+                //toDoList.value?.let { listTodo ->
+
+
+                //items(item) {
+                //ToDoItem(it.actividad, it.todoDescription, it.date)
+                //Text(text = it.todoDescription)
+                Card(
+                    elevation = animateDpAsState(
+                        if (dismissState.dismissDirection != null) 4.dp else 6.dp
+                    ).value,
+                    shape = RoundedCornerShape(20),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(6.dp)
+                ) {
+
+
+                    Column(modifier = Modifier.padding(4.dp)) {
+                        Text(
+                            text = item.actividad,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
                         )
+                        Text(text = item.todoDescription)
+                        val simpleDateFormat = SimpleDateFormat("dd/MM/yyyy")
+                        val dateString = simpleDateFormat.format(item.date)
+                        Text(text = dateString)
+
+
                     }
-                },
-                dismissContent = {
-                    /* Card(
-                         elevation = animateDpAsState(
-                             if (dismissState.dismissDirection != null) 4.dp else 0.dp
-                         ).value
-                     ) {
-                         ListItem(
-                             text = {
-                                 Text(item, fontWeight = if (unread) FontWeight.Bold else null)
-                             },
-                             secondaryText = { Text("Swipe me left or right!") }
-                         )
-                     }*/
-                    //toDoList.value?.let { listTodo ->
-
-
-                        //items(item) {
-                            //ToDoItem(it.actividad, it.todoDescription, it.date)
-                            //Text(text = it.todoDescription)
-                            Card(
-                                elevation = animateDpAsState(
-                                    if (dismissState.dismissDirection != null) 4.dp else 6.dp
-                                ).value,
-                                shape = RoundedCornerShape(20),
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(6.dp)
-                            ) {
-
-
-                                    Column(modifier = Modifier.padding(4.dp)) {
-                                        Text(
-                                            text = item.actividad,
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                        Text(text = item.todoDescription)
-                                        val simpleDateFormat = SimpleDateFormat("dd/MM/yyyy")
-                                        val dateString = simpleDateFormat.format(item.date)
-                                        Text(text = dateString)
-
-
-                                    }
-                                    /*if(checkedState.value)
-                                        scope.launch {Modifier.alpha(0f)}*/
-
-
-                            }
-                       // }
-                        // }
-                        //TODO( "ADD TODO LIST" )
+                    /*if(checkedState.value)
+                        scope.launch {Modifier.alpha(0f)}*/
 
 
                 }
+                // }
+                // }
+                //TODO( "ADD TODO LIST" )
 
-            )
-       // }
+
+            }
+
+        )
+        // }
     }
 }
 
