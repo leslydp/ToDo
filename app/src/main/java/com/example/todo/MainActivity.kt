@@ -147,7 +147,7 @@ fun ToDOScreen(
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(
-                            listTodo,
+                            listTodo.filter { !it.done },
                             { todoEntity: ToDoEntity -> todoEntity.actividad }) { currentTodo ->
                             /* ToDoItem(currentTodo, onCheckedChangeState = { done ->
                                  Log.d("LIST_ITEM", "currentTodo: ${currentTodo.actividad}-$done")
